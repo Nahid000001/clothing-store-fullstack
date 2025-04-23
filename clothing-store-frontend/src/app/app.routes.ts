@@ -39,8 +39,38 @@ export const routes: Routes = [
     path: 'health-check',
     loadComponent: () => import('./components/health-check/health-check.component').then(m => m.HealthCheckComponent)
   },
+  // Admin routes
+  {
+    path: 'admin',
+    canActivate: [authGuard, adminGuard],
+    loadChildren: () => import('./components/admin/admin.routes').then(m => m.ADMIN_ROUTES)
+  },
+  // Store form (add/edit)
+  {
+    path: 'admin/stores/new',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./components/admin/store-form/store-form.component').then(m => m.StoreFormComponent)
+  },
+  {
+    path: 'admin/stores/edit/:id',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./components/admin/store-form/store-form.component').then(m => m.StoreFormComponent)
+  },
+  // Error pages
+  {
+    path: 'error/server-error',
+    loadComponent: () => import('./components/error-pages/server-error/server-error.component').then(m => m.ServerErrorComponent)
+  },
+  {
+    path: 'error/access-denied',
+    loadComponent: () => import('./components/error-pages/access-denied/access-denied.component').then(m => m.AccessDeniedComponent)
+  },
+  {
+    path: '404',
+    loadComponent: () => import('./components/error-pages/not-found/not-found.component').then(m => m.NotFoundComponent)
+  },
   { 
     path: '**', 
-    redirectTo: '' 
+    redirectTo: '/404'
   }
 ];

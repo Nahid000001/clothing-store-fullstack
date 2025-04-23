@@ -1,15 +1,25 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-loading-spinner',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './loading-spinner.component.html',
-  styleUrls: ['./loading-spinner.component.scss']
+  imports: [CommonModule, MatProgressSpinnerModule],
+  template: `
+    <div class="spinner-container">
+      <mat-spinner [diameter]="diameter" [color]="color"></mat-spinner>
+    </div>
+  `,
+  styles: [`
+    .spinner-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  `]
 })
 export class LoadingSpinnerComponent {
-  @Input() size: 'small' | 'medium' | 'large' = 'medium';
-  @Input() overlay = false;
-  @Input() message: string = 'Loading...';
+  @Input() diameter: number = 40;
+  @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
 } 

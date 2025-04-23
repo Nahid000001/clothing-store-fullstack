@@ -1,80 +1,97 @@
 <div class="profile-container">
-  <h2>User Profile</h2>
-  
-  <div *ngIf="loading" class="loading-spinner">
-    <div class="spinner"></div>
-    Loading profile...
-  </div>
-  
-  <div *ngIf="error" class="alert alert-danger">
-    {{ error }}
-  </div>
-  
-  <div *ngIf="updateSuccess" class="alert alert-success">
-    Your profile has been updated successfully!
-  </div>
-  
-  <div *ngIf="user && !loading" class="profile-details">
-    <div class="user-info-section">
-      <div class="user-avatar">
+  <mat-card class="profile-card">
+    <mat-card-header>
+      <div mat-card-avatar class="user-avatar" [style.background-color]="avatarColor">
         {{ getUserInitial() }}
       </div>
-      <div class="user-basic-info">
-        <h3>{{ user.username }}</h3>
-        <span class="user-role">{{ user.role }}</span>
-        <span class="join-date">Joined: {{ user.created_at | date }}</span>
-      </div>
+      <mat-card-title>Profile</mat-card-title>
+      <mat-card-subtitle *ngIf="user">
+        {{ user.username }} <span class="user-role">{{ user.role }}</span>
+      </mat-card-subtitle>
+      <button mat-icon-button class="refresh-button" aria-label="Refresh profile" (click)="refreshProfile()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </mat-card-header>
+
+    <div *ngIf="loading" class="loading-container">
+      <app-loading-spinner></app-loading-spinner>
     </div>
-    
-    <form [formGroup]="profileForm" (ngSubmit)="updateProfile()" class="profile-form">
-      <div class="form-group">
-        <label for="first_name">First Name</label>
-        <input 
-          type="text" 
-          id="first_name" 
-          formControlName="first_name" 
-          class="form-control"
-          [ngClass]="{'invalid': profileForm.get('first_name')?.invalid && profileForm.get('first_name')?.touched}"
-        >
-        <div *ngIf="profileForm.get('first_name')?.invalid && profileForm.get('first_name')?.touched" class="validation-error">
-          First name is required
+
+    <mat-card-content *ngIf="!loading">
+      <div *ngIf="error" class="error-message">
+        <mat-icon>error</mat-icon>
+        <span>{{ error }}</span>
+      </div>
+
+      <div *ngIf="user" class="profile-content">
+        <div class="user-info">
+          <div class="info-item">
+            <mat-icon>person</mat-icon>
+            <span class="label">Username:</span>
+            <span class="value">{{ user.username }}</span>
+          </div>
+          <div class="info-item">
+            <mat-icon>calendar_today</mat-icon>
+            <span class="label">Joined:</span>
+            <span class="value">{{ user.created_at | date:'mediumDate' }}</span>
+          </div>
+          <div class="info-item">
+            <mat-icon>supervisor_account</mat-icon>
+            <span class="label">Role:</span>
+            <span class="value">{{ user.role | titlecase }}</span>
+          </div>
+        </div>
+
+        <div class="profile-form-container">
+          <h3>Edit Profile Information</h3>
+          <form [formGroup]="profileForm" (ngSubmit)="updateProfile()" class="profile-form">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>First Name</mat-label>
+              <input matInput formControlName="first_name" placeholder="Enter your first name">
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error *ngIf="profileForm.get('first_name')?.invalid && profileForm.get('first_name')?.touched">
+                {{ getErrorMessage('first_name') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Last Name</mat-label>
+              <input matInput formControlName="last_name" placeholder="Enter your last name">
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error *ngIf="profileForm.get('last_name')?.invalid && profileForm.get('last_name')?.touched">
+                {{ getErrorMessage('last_name') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" placeholder="Enter your email" type="email">
+              <mat-icon matSuffix>email</mat-icon>
+              <mat-error *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched">
+                {{ getErrorMessage('email') }}
+              </mat-error>
+            </mat-form-field>
+
+            <div class="form-actions">
+              <button 
+                mat-raised-button 
+                color="primary" 
+                type="submit" 
+                [disabled]="profileForm.invalid || submitting"
+              >
+                <span *ngIf="!submitting">Update Profile</span>
+                <app-loading-spinner *ngIf="submitting" [diameter]="24"></app-loading-spinner>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-      
-      <div class="form-group">
-        <label for="last_name">Last Name</label>
-        <input 
-          type="text" 
-          id="last_name" 
-          formControlName="last_name" 
-          class="form-control"
-          [ngClass]="{'invalid': profileForm.get('last_name')?.invalid && profileForm.get('last_name')?.touched}"
-        >
-        <div *ngIf="profileForm.get('last_name')?.invalid && profileForm.get('last_name')?.touched" class="validation-error">
-          Last name is required
-        </div>
+
+      <div *ngIf="!user && !loading && !error" class="no-user-data">
+        <mat-icon>person_off</mat-icon>
+        <p>Unable to load user data. Please try refreshing the page.</p>
+        <button mat-raised-button color="primary" (click)="refreshProfile()">Refresh</button>
       </div>
-      
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input 
-          type="email" 
-          id="email" 
-          formControlName="email" 
-          class="form-control"
-          [ngClass]="{'invalid': profileForm.get('email')?.invalid && profileForm.get('email')?.touched}"
-        >
-        <div *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched" class="validation-error">
-          <span *ngIf="profileForm.get('email')?.errors?.['required']">Email is required</span>
-          <span *ngIf="profileForm.get('email')?.errors?.['email']">Please enter a valid email address</span>
-        </div>
-      </div>
-      
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid || loading">
-          {{ loading ? 'Updating...' : 'Update Profile' }}
-        </button>
-      </div>
-    </form>
-  </div>
+    </mat-card-content>
+  </mat-card>
 </div> 

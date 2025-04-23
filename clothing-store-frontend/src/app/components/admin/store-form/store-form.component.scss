@@ -1,0 +1,128 @@
+.store-form-container {
+  padding: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.form-card {
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  
+  mat-card-header {
+    margin-bottom: 16px;
+    
+    mat-card-title {
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    mat-card-subtitle {
+      color: #616161;
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.error-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 16px;
+  border-radius: 4px;
+  margin-bottom: 24px;
+  
+  mat-icon {
+    color: #c62828;
+  }
+}
+
+mat-card-content {
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.checkbox-field {
+  margin: 8px 0 16px;
+}
+
+mat-card-actions {
+  padding: 8px 16px 16px;
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  
+  button {
+    min-width: 120px;
+  }
+}
+
+// Make the form more responsive on smaller screens
+@media (max-width: 768px) {
+  .store-form-container {
+    padding: 16px;
+  }
+  
+  mat-card-actions {
+    button {
+      min-width: 100px;
+    }
+  }
+}
+
+// Add some animations to improve the UI experience
+.form-card {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Add styles for form validation visual cues
+mat-form-field {
+  &.ng-touched.ng-invalid {
+    mat-label {
+      color: #f44336;
+    }
+  }
+}
+
+textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+// Focus animation for buttons
+button {
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  &:focus:not([disabled]), 
+  &:hover:not([disabled]) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  }
+} 

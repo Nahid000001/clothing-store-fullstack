@@ -1,0 +1,103 @@
+<div class="admin-stores-container">
+  <div class="header">
+    <h1>Store Management</h1>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      [routerLink]="['/admin/stores/new']"
+      aria-label="Add new store">
+      <mat-icon>add</mat-icon>
+      Add Store
+    </button>
+  </div>
+
+  <mat-card class="content-card">
+    <div *ngIf="loading" class="loading-container">
+      <app-loading-spinner></app-loading-spinner>
+    </div>
+
+    <div *ngIf="error && !loading" class="error-alert">
+      <mat-icon>error</mat-icon>
+      <span>{{ error }}</span>
+      <button mat-button color="warn" (click)="loadStores()">Try Again</button>
+    </div>
+
+    <div *ngIf="!loading && !error" class="stores-table-container">
+      <div *ngIf="stores.length === 0" class="no-data">
+        <mat-icon>store_off</mat-icon>
+        <p>No stores found</p>
+        <button mat-raised-button color="primary" [routerLink]="['/admin/stores/new']">
+          Add Your First Store
+        </button>
+      </div>
+
+      <table *ngIf="stores.length > 0" mat-table [dataSource]="stores" matSort (matSortChange)="handleSort($event)" class="stores-table">
+        <!-- Company Name Column -->
+        <ng-container matColumnDef="company_name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Company Name</th>
+          <td mat-cell *matCellDef="let store">{{ store.company_name }}</td>
+        </ng-container>
+
+        <!-- Location Column -->
+        <ng-container matColumnDef="location">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Location</th>
+          <td mat-cell *matCellDef="let store">{{ store.location }}</td>
+        </ng-container>
+
+        <!-- Rating Column -->
+        <ng-container matColumnDef="average_rating">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Rating</th>
+          <td mat-cell *matCellDef="let store">
+            <div class="rating-display">
+              {{ store.average_rating ? (store.average_rating | number:'1.1-1') : 'N/A' }}
+              <mat-icon *ngIf="store.average_rating" class="star-icon">star</mat-icon>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Created At Column -->
+        <ng-container matColumnDef="created_at">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
+          <td mat-cell *matCellDef="let store">{{ store.created_at | date:'medium' }}</td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let store">
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Store actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="viewStore(store._id)">
+                <mat-icon>visibility</mat-icon>
+                <span>View</span>
+              </button>
+              <button mat-menu-item [routerLink]="['/admin/stores/edit', store._id]">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item (click)="deleteStore(store)">
+                <mat-icon color="warn">delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <mat-paginator 
+        *ngIf="stores.length > 0" 
+        [length]="totalStores"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        [pageIndex]="currentPage"
+        (page)="handlePageEvent($event)"
+        aria-label="Select page">
+      </mat-paginator>
+    </div>
+  </mat-card>
+</div> 

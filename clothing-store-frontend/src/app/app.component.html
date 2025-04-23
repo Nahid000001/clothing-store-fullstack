@@ -31,7 +31,7 @@
   
   <!-- Global Loading Indicator -->
   <div *ngIf="isLoading" class="global-loading-overlay">
-    <app-loading-spinner message="Loading..." [overlay]="true"></app-loading-spinner>
+    <app-loading-spinner [diameter]="40" color="primary"></app-loading-spinner>
   </div>
   
   <!-- Main Content Area -->
@@ -178,5 +178,18 @@
 
 .retry-btn:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+.global-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
 }
 </style>

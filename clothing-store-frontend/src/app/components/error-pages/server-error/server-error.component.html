@@ -1,0 +1,24 @@
+<div class="error-container">
+  <mat-card class="error-card">
+    <mat-card-content class="error-content">
+      <div class="error-icon">
+        <mat-icon>cloud_off</mat-icon>
+      </div>
+      <h1 class="error-code">500</h1>
+      <h2 class="error-title">Server Error</h2>
+      <p class="error-message">
+        {{ errorMessage }}
+      </p>
+      <div class="action-buttons">
+        <button mat-raised-button color="primary" routerLink="/" (click)="clearError()">
+          <mat-icon>home</mat-icon>
+          Return Home
+        </button>
+        <button mat-stroked-button (click)="window.location.reload()">
+          <mat-icon>refresh</mat-icon>
+          Refresh Page
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div> 

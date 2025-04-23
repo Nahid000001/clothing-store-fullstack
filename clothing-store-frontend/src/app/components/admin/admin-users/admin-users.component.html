@@ -1,0 +1,77 @@
+<div class="admin-users-container">
+  <div class="header">
+    <h1>User Management</h1>
+  </div>
+
+  <mat-card class="content-card">
+    <div *ngIf="loading" class="loading-container">
+      <app-loading-spinner></app-loading-spinner>
+    </div>
+
+    <div *ngIf="error && !loading" class="error-alert">
+      <mat-icon>error</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <div *ngIf="!loading && !error" class="users-table-container">
+      <div *ngIf="users.length === 0" class="no-data">
+        <mat-icon>people_outline</mat-icon>
+        <p>No users found or user management not implemented yet.</p>
+        <p class="secondary-text">This is a placeholder for the user management functionality.</p>
+      </div>
+
+      <table *ngIf="users.length > 0" mat-table [dataSource]="users" class="users-table">
+        <!-- Username Column -->
+        <ng-container matColumnDef="username">
+          <th mat-header-cell *matHeaderCellDef>Username</th>
+          <td mat-cell *matCellDef="let user">{{ user.username }}</td>
+        </ng-container>
+
+        <!-- Email Column -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Email</th>
+          <td mat-cell *matCellDef="let user">{{ user.email || 'Not provided' }}</td>
+        </ng-container>
+
+        <!-- Role Column -->
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef>Role</th>
+          <td mat-cell *matCellDef="let user">
+            <span class="role-badge" [ngClass]="getUserRoleClass(user.role)">
+              {{ user.role | titlecase }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Created At Column -->
+        <ng-container matColumnDef="created_at">
+          <th mat-header-cell *matHeaderCellDef>Joined</th>
+          <td mat-cell *matCellDef="let user">{{ user.created_at | date:'medium' }}</td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let user">
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="User actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item>
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item>
+                <mat-icon color="warn">block</mat-icon>
+                <span>Disable</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+  </mat-card>
+</div> 

@@ -1,0 +1,34 @@
+<div class="error-container">
+  <mat-card class="error-card">
+    <mat-card-content class="error-content">
+      <div class="error-icon">
+        <mat-icon>gpp_bad</mat-icon>
+      </div>
+      <h1 class="error-code">403</h1>
+      <h2 class="error-title">Access Denied</h2>
+      <p class="error-message">
+        You don't have permission to access this page. This area requires higher privileges than your current account has.
+      </p>
+      <div class="action-buttons">
+        <button mat-raised-button color="primary" routerLink="/">
+          <mat-icon>home</mat-icon>
+          Return Home
+        </button>
+        
+        <ng-container *ngIf="isLoggedIn(); else loginButton">
+          <button mat-stroked-button (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            Logout
+          </button>
+        </ng-container>
+        
+        <ng-template #loginButton>
+          <button mat-stroked-button routerLink="/login">
+            <mat-icon>login</mat-icon>
+            Login as Different User
+          </button>
+        </ng-template>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div> 

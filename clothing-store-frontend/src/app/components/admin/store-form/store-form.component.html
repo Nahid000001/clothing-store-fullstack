@@ -1,0 +1,98 @@
+<div class="store-form-container">
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>{{ isEditMode ? 'Edit Store' : 'Create New Store' }}</mat-card-title>
+      <mat-card-subtitle>{{ isEditMode ? 'Update store information' : 'Fill in the details to create a new store' }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <div *ngIf="loading" class="loading-container">
+      <app-loading-spinner></app-loading-spinner>
+    </div>
+    
+    <div *ngIf="error && !loading" class="error-alert">
+      <mat-icon>error</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <mat-card-content *ngIf="!loading">
+      <form [formGroup]="storeForm" (ngSubmit)="onSubmit()">
+        <!-- Company Name -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Company Name</mat-label>
+          <input matInput formControlName="company_name" placeholder="Enter company name">
+          <mat-error *ngIf="storeForm.get('company_name')?.invalid && storeForm.get('company_name')?.touched">
+            {{ getErrorMessage('company_name') }}
+          </mat-error>
+        </mat-form-field>
+        
+        <!-- Title -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Title</mat-label>
+          <input matInput formControlName="title" placeholder="Enter store title">
+          <mat-hint>A concise title for your store listing</mat-hint>
+          <mat-error *ngIf="storeForm.get('title')?.invalid && storeForm.get('title')?.touched">
+            {{ getErrorMessage('title') }}
+          </mat-error>
+        </mat-form-field>
+        
+        <!-- Description -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea 
+            matInput 
+            formControlName="description" 
+            placeholder="Describe your store"
+            rows="6"
+          ></textarea>
+          <mat-hint align="end">{{ storeForm.get('description')?.value?.length || 0 }}/2000</mat-hint>
+          <mat-error *ngIf="storeForm.get('description')?.invalid && storeForm.get('description')?.touched">
+            {{ getErrorMessage('description') }}
+          </mat-error>
+        </mat-form-field>
+        
+        <!-- Location -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Location</mat-label>
+          <input matInput formControlName="location" placeholder="Store location">
+          <mat-icon matSuffix>location_on</mat-icon>
+          <mat-error *ngIf="storeForm.get('location')?.invalid && storeForm.get('location')?.touched">
+            {{ getErrorMessage('location') }}
+          </mat-error>
+        </mat-form-field>
+        
+        <!-- Work Type -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Work Type</mat-label>
+          <mat-select formControlName="work_type">
+            <mat-option *ngFor="let option of workTypeOptions" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="storeForm.get('work_type')?.invalid && storeForm.get('work_type')?.touched">
+            {{ getErrorMessage('work_type') }}
+          </mat-error>
+        </mat-form-field>
+        
+        <!-- Is Remote -->
+        <div class="checkbox-field">
+          <mat-checkbox formControlName="is_remote" color="primary">
+            This is an online store
+          </mat-checkbox>
+        </div>
+      </form>
+    </mat-card-content>
+    
+    <mat-card-actions *ngIf="!loading" align="end">
+      <button mat-button type="button" (click)="cancel()" [disabled]="submitting">CANCEL</button>
+      <button 
+        mat-raised-button 
+        color="primary" 
+        type="submit" 
+        [disabled]="submitting || storeForm.invalid" 
+        (click)="onSubmit()">
+        <span *ngIf="!submitting">{{ isEditMode ? 'UPDATE' : 'CREATE' }}</span>
+        <app-loading-spinner *ngIf="submitting" [diameter]="24"></app-loading-spinner>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div> 
