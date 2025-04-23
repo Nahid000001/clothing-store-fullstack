@@ -16,7 +16,11 @@
       </svg>
       <h2>Error Loading Store</h2>
       <p>{{ error }}</p>
-      <button class="btn btn-primary" (click)="loadStoreDetails()">Try Again</button>
+      <div *ngIf="error.includes('Invalid store ID format')">
+        <p class="help-text">Please use a valid store ID from the store listing page.</p>
+        <a routerLink="/stores" class="btn btn-primary">Go to Store Listing</a>
+      </div>
+      <button *ngIf="!error.includes('Invalid store ID format')" class="btn btn-primary" (click)="loadStoreDetails()">Try Again</button>
     </div>
   </div>
   

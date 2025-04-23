@@ -74,9 +74,15 @@ export class StoreDetailComponent implements OnInit {
   ngOnInit() {
     this.storeId = this.route.snapshot.paramMap.get('id') || '';
     
-    if (this.storeId) {
+    // Check if storeId is a valid MongoDB ObjectId (24 hex chars)
+    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(this.storeId);
+    
+    if (this.storeId && isValidObjectId) {
       this.loadStoreDetails();
       this.checkUserPermissions();
+    } else if (this.storeId && !isValidObjectId) {
+      this.error = 'Invalid store ID format. Store IDs must be valid MongoDB ObjectIDs.';
+      this.loading = false;
     } else {
       this.error = 'Invalid store ID';
       this.loading = false;
@@ -99,7 +105,11 @@ export class StoreDetailComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error loading store details:', error);
-          this.error = error.message || 'Failed to load store details';
+          if (error.status === 400 && error.message?.includes('Invalid store ID format')) {
+            this.error = 'Invalid store ID format. Store IDs must be valid MongoDB ObjectIDs.';
+          } else {
+            this.error = error.message || 'Failed to load store details';
+          }
           this.loading = false;
         }
       });
