@@ -1,0 +1,171 @@
+<!-- src/app/components/admin/product-form/product-form.component.html -->
+<div class="product-form-container">
+  <div class="container">
+    <div class="form-header">
+      <h1>{{ isEditMode ? 'Edit' : 'Add' }} Product</h1>
+      <p class="subtitle">{{ isEditMode ? 'Update product information' : 'Create a new product' }}</p>
+    </div>
+    
+    <!-- Loading spinner -->
+    <div *ngIf="loading" class="loading-container">
+      <app-loading-spinner>Loading product data...</app-loading-spinner>
+    </div>
+    
+    <!-- Error message -->
+    <div *ngIf="error" class="alert alert-danger">
+      <p>{{ error }}</p>
+    </div>
+    
+    <!-- Success message -->
+    <div *ngIf="success" class="alert alert-success">
+      <p>{{ success }}</p>
+    </div>
+    
+    <!-- Product form -->
+    <form *ngIf="!loading" [formGroup]="productForm" (ngSubmit)="onSubmit()" class="product-form">
+      <div class="form-grid">
+        <!-- Basic information -->
+        <div class="form-section">
+          <h2>Basic Information</h2>
+          
+          <div class="form-group">
+            <label for="name">Product Name <span class="required">*</span></label>
+            <input type="text" id="name" formControlName="name" class="form-control" 
+                   [class.is-invalid]="hasError('name', 'required') || hasError('name', 'minlength')">
+            <div *ngIf="hasError('name', 'required')" class="error-message">
+              Product name is required
+            </div>
+            <div *ngIf="hasError('name', 'minlength')" class="error-message">
+              Product name must be at least 3 characters
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="description">Description <span class="required">*</span></label>
+            <textarea id="description" formControlName="description" class="form-control" rows="4"
+                     [class.is-invalid]="hasError('description', 'required') || hasError('description', 'minlength')"></textarea>
+            <div *ngIf="hasError('description', 'required')" class="error-message">
+              Description is required
+            </div>
+            <div *ngIf="hasError('description', 'minlength')" class="error-message">
+              Description must be at least 10 characters
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="price">Price <span class="required">*</span></label>
+              <input type="number" id="price" formControlName="price" class="form-control" step="0.01" min="0"
+                     [class.is-invalid]="hasError('price', 'required') || hasError('price', 'min')">
+              <div *ngIf="hasError('price', 'required')" class="error-message">
+                Price is required
+              </div>
+              <div *ngIf="hasError('price', 'min')" class="error-message">
+                Price must be greater than 0
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="stock">Stock <span class="required">*</span></label>
+              <input type="number" id="stock" formControlName="stock" class="form-control" min="0"
+                     [class.is-invalid]="hasError('stock', 'required') || hasError('stock', 'min')">
+              <div *ngIf="hasError('stock', 'required')" class="error-message">
+                Stock is required
+              </div>
+              <div *ngIf="hasError('stock', 'min')" class="error-message">
+                Stock cannot be negative
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="category">Category <span class="required">*</span></label>
+            <select id="category" formControlName="category" class="form-control"
+                    [class.is-invalid]="hasError('category', 'required')">
+              <option value="">Select a category</option>
+              <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+            </select>
+            <div *ngIf="hasError('category', 'required')" class="error-message">
+              Category is required
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="image_url">Image URL</label>
+            <input type="text" id="image_url" formControlName="image_url" class="form-control"
+                   placeholder="https://example.com/image.jpg">
+            <div class="form-hint">
+              Leave empty to use a default image based on the category
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="store_id">Store ID <span class="required">*</span></label>
+            <input type="text" id="store_id" formControlName="store_id" class="form-control"
+                   [class.is-invalid]="hasError('store_id', 'required')">
+            <div *ngIf="hasError('store_id', 'required')" class="error-message">
+              Store ID is required
+            </div>
+          </div>
+        </div>
+        
+        <!-- Options -->
+        <div class="form-section">
+          <h2>Product Options</h2>
+          
+          <div class="form-group">
+            <label>Sizes</label>
+            <div class="options-grid">
+              <div *ngFor="let size of availableSizes" class="option-checkbox">
+                <input type="checkbox" 
+                       [id]="'size-' + size"
+                       [checked]="sizesFormArray.value.includes(size)"
+                       (change)="handleSizeChange($event, size)">
+                <label [for]="'size-' + size">{{ size }}</label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Colors</label>
+            <div class="color-options">
+              <div *ngFor="let color of availableColors" class="color-option">
+                <input type="checkbox" 
+                       [id]="'color-' + color"
+                       [checked]="colorsFormArray.value.includes(color)"
+                       (change)="handleColorChange($event, color)">
+                <label [for]="'color-' + color" class="color-label">
+                  <span class="color-swatch" [style.backgroundColor]="color.toLowerCase()"></span>
+                  <span class="color-name">{{ color }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Preview -->
+          <div class="product-preview">
+            <h3>Preview</h3>
+            <div class="preview-card">
+              <div class="preview-image">
+                <img [src]="productForm.get('image_url')?.value || 'https://source.unsplash.com/300x300/?clothing'" alt="Product preview">
+              </div>
+              <div class="preview-info">
+                <div class="preview-category">{{ productForm.get('category')?.value || 'Category' }}</div>
+                <h4 class="preview-name">{{ productForm.get('name')?.value || 'Product Name' }}</h4>
+                <div class="preview-price">${{ productForm.get('price')?.value || '0.00' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Form actions -->
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="cancel()">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="productForm.invalid">
+          {{ isEditMode ? 'Update' : 'Create' }} Product
+        </button>
+      </div>
+    </form>
+  </div>
+</div> 

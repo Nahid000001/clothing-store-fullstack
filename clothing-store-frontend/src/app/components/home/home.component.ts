@@ -3,7 +3,9 @@ import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StoreService } from '../../services/store.service';
+import { ProductService } from '../../services/product.service';
 import { Store } from '../../interfaces/store.interface';
+import { Product } from '../../models/store.model';
 
 @Component({
   selector: 'app-home',
@@ -16,6 +18,12 @@ export class HomeComponent implements OnInit {
   featuredStores: any[] = [];
   loading = false;
   error = '';
+  
+  // Product related properties
+  featuredProducts: Product[] = [];
+  loadingProducts = false;
+  errorProducts = '';
+  
   colorPalette = [
     '#1a237e', // Primary dark
     '#534bae', // Primary light
@@ -36,17 +44,32 @@ export class HomeComponent implements OnInit {
     'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80', // Modern clothing on racks
     'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1587&q=80'  // High end clothing display
   ];
+  
+  // Product image placeholders
+  productImages = [
+    'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80', // Clothing items
+    'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80', // Shoes
+    'https://images.unsplash.com/photo-1556306535-0f09a537f0a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80', // Accessories
+    'https://images.unsplash.com/photo-1551232864-3f0890e580d9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80', // Dresses
+    'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80', // Jackets
+    'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80', // Pants
+  ];
 
-  constructor(private storeService: StoreService) { }
+  constructor(
+    private storeService: StoreService,
+    private productService: ProductService
+  ) { }
 
   ngOnInit() {
     // Set loading state first
     this.loading = true;
+    this.loadingProducts = true;
     
-    // Load stores 
+    // Load stores and products 
     this.loadFeaturedStores();
+    this.loadFeaturedProducts();
     
-    // Add a backup in case something goes wrong
+    // Add a backup in case something goes wrong with stores
     setTimeout(() => {
       // If still loading or showing error after 2 seconds, force load dummy data
       if (this.loading || this.error) {
@@ -54,6 +77,16 @@ export class HomeComponent implements OnInit {
         this.featuredStores = this.getDummyStores();
         this.loading = false;
         this.error = '';
+      }
+    }, 2000);
+    
+    // Add a backup in case something goes wrong with products
+    setTimeout(() => {
+      if (this.loadingProducts || this.errorProducts) {
+        console.log('Fallback: Loading dummy product data');
+        this.featuredProducts = this.getDummyProducts();
+        this.loadingProducts = false;
+        this.errorProducts = '';
       }
     }, 2000);
   }
@@ -123,6 +156,11 @@ export class HomeComponent implements OnInit {
       }
     ];
   }
+  
+  // Method to provide dummy product data
+  getDummyProducts(): Product[] {
+    return this.productService.getDummyProducts(4);
+  }
 
   loadFeaturedStores() {
     this.loading = true;
@@ -155,9 +193,66 @@ export class HomeComponent implements OnInit {
         }
       });
   }
+  
+  loadFeaturedProducts() {
+    this.loadingProducts = true;
+    this.errorProducts = '';
+    console.log('Attempting to load featured products...');
+    
+    // Try to get products from API
+    this.productService.getAllProducts(1, 4)
+      .subscribe({
+        next: data => {
+          console.log('Received product data:', data);
+          this.loadingProducts = false;
+          
+          if (data && data.products && data.products.length > 0) {
+            this.featuredProducts = data.products;
+            this.errorProducts = '';
+            console.log('Featured products set:', this.featuredProducts);
+          } else {
+            console.log('No products returned or empty array');
+            // Fall back to dummy data if no products are returned
+            this.featuredProducts = this.getDummyProducts();
+            this.errorProducts = '';
+          }
+        },
+        error: error => {
+          console.error('Error loading featured products:', error);
+          this.loadingProducts = false;
+          // Fall back to dummy data on error
+          this.featuredProducts = this.getDummyProducts();
+          this.errorProducts = '';
+        }
+      });
+  }
 
   retryLoading(): void {
     this.loadFeaturedStores();
+  }
+  
+  // Get image URL for product
+  getProductImage(product: Product): string {
+    // Map product categories to specific image categories 
+    const categoryToImageIndex: Record<string, number> = {
+      'Shirts': 0,
+      'Pants': 5,
+      'Dresses': 3,
+      'Accessories': 2,
+      'Shoes': 1,
+      'Jackets': 4
+    };
+    
+    // Use product category to determine image if available, otherwise use ID
+    let index = 0;
+    if (product.category && categoryToImageIndex[product.category] !== undefined) {
+      index = categoryToImageIndex[product.category];
+    } else if (product._id) {
+      // Get a consistent image based on product ID
+      index = Math.abs(this.hashString(product._id)) % this.productImages.length;
+    }
+    
+    return this.productImages[index] || this.productImages[0];
   }
 
   // Helper methods for the template

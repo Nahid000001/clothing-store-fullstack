@@ -1,0 +1,174 @@
+<!-- src/app/components/product-list/product-list.component.html -->
+<div class="product-list-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <app-loading-spinner>Loading products...</app-loading-spinner>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error && !loading" class="error-container">
+    <div class="alert alert-warning">
+      <p>{{ error }}</p>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div *ngIf="!loading && products.length > 0" class="filters-container">
+    <div class="filter-row">
+      <div class="filter-group search-filter">
+        <div class="input-group">
+          <span class="input-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+          <input type="text" placeholder="Search products..." [(ngModel)]="searchTerm" (input)="applyFilters()">
+          <button *ngIf="searchTerm" class="clear-button" (click)="searchTerm = ''; applyFilters()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-group category-filter">
+        <select [(ngModel)]="selectedCategory" (change)="applyFilters()">
+          <option value="">All Categories</option>
+          <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group price-filter">
+        <label>
+          Price Range: ${{ priceRange.min }} - ${{ priceRange.max }}
+        </label>
+        <div class="price-range-inputs">
+          <input type="range" 
+                 [min]="0" 
+                 [max]="1000" 
+                 [(ngModel)]="priceRange.min" 
+                 (input)="applyFilters()">
+          <input type="range" 
+                 [min]="0" 
+                 [max]="1000" 
+                 [(ngModel)]="priceRange.max" 
+                 (input)="applyFilters()">
+        </div>
+      </div>
+
+      <div class="filter-group sort-filter">
+        <select [(ngModel)]="sortOption" (change)="applySorting()">
+          <option value="default">Featured</option>
+          <option value="priceAsc">Price: Low to High</option>
+          <option value="priceDesc">Price: High to Low</option>
+          <option value="nameAsc">Name: A to Z</option>
+          <option value="nameDesc">Name: Z to A</option>
+          <option value="newest">Newest</option>
+        </select>
+      </div>
+    </div>
+
+    <div *ngIf="selectedCategory || searchTerm || priceRange.min > 0 || priceRange.max < 1000 || sortOption !== 'default'"
+         class="active-filters">
+      <span>Active Filters:</span>
+      <div class="filter-tags">
+        <div *ngIf="selectedCategory" class="filter-tag">
+          Category: {{ selectedCategory }} <button (click)="selectedCategory = ''; applyFilters()">×</button>
+        </div>
+        <div *ngIf="searchTerm" class="filter-tag">
+          Search: {{ searchTerm }} <button (click)="searchTerm = ''; applyFilters()">×</button>
+        </div>
+        <div *ngIf="priceRange.min > 0 || priceRange.max < 1000" class="filter-tag">
+          Price: ${{ priceRange.min }} - ${{ priceRange.max }} <button (click)="priceRange = {min: 0, max: 1000}; applyFilters()">×</button>
+        </div>
+        <div *ngIf="sortOption !== 'default'" class="filter-tag">
+          Sort: {{ sortOption }} <button (click)="sortOption = 'default'; applySorting()">×</button>
+        </div>
+      </div>
+      <button class="clear-all-btn" (click)="clearFilters()">Clear All</button>
+    </div>
+  </div>
+
+  <!-- Results Count -->
+  <div *ngIf="!loading && filteredProducts.length > 0" class="results-container">
+    <p>Showing {{ filteredProducts.length }} products</p>
+  </div>
+
+  <!-- Products Grid -->
+  <div *ngIf="!loading && filteredProducts.length > 0" class="products-grid">
+    <div *ngFor="let product of filteredProducts" class="product-card">
+      <div class="product-image">
+        <img [src]="getProductImageUrl(product)" [alt]="product.name">
+        <div class="product-actions">
+          <button class="quick-view-btn">Quick View</button>
+          <button class="add-to-cart-btn">Add to Cart</button>
+        </div>
+      </div>
+      <div class="product-info">
+        <div class="product-category">{{ product.category }}</div>
+        <h3 class="product-name">{{ product.name }}</h3>
+        <div class="product-price">${{ product.price.toFixed(2) }}</div>
+        <div class="product-meta">
+          <span *ngIf="product.stock > 0" class="in-stock">In Stock</span>
+          <span *ngIf="product.stock <= 0" class="out-of-stock">Out of Stock</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && filteredProducts.length === 0 && products.length > 0" class="empty-state">
+    <div class="empty-state-content">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <h3>No Products Found</h3>
+      <p>We couldn't find any products matching your filters.</p>
+      <button class="btn btn-primary" (click)="clearFilters()">Clear Filters</button>
+    </div>
+  </div>
+
+  <!-- No Products State -->
+  <div *ngIf="!loading && products.length === 0" class="empty-state">
+    <div class="empty-state-content">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <path d="M16 10a4 4 0 0 1-8 0"></path>
+      </svg>
+      <h3>No Products Available</h3>
+      <p>There are no products available at the moment.</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && totalPages > 1" class="pagination">
+    <button [disabled]="page === 1" (click)="prevPage()" class="pagination-btn prev-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+    </button>
+    
+    <div class="page-numbers">
+      <button *ngFor="let pageNum of getPageNumbers()" 
+              [class.active]="pageNum === page"
+              [class.ellipsis]="pageNum === 0"
+              [disabled]="pageNum === 0"
+              (click)="goToPage(pageNum)" 
+              class="page-number">
+        {{ pageNum === 0 ? '...' : pageNum }}
+      </button>
+    </div>
+    
+    <button [disabled]="page === totalPages" (click)="nextPage()" class="pagination-btn next-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </button>
+  </div>
+</div> 

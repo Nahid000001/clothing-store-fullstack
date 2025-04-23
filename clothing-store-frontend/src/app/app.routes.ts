@@ -22,6 +22,14 @@ export const routes: Routes = [
     path: 'stores/:id',
     loadComponent: () => import('./components/store-detail/store-detail.component').then(m => m.StoreDetailComponent)
   },
+  {
+    path: 'products',
+    loadComponent: () => import('./components/product-list/product-list.component').then(m => m.ProductListComponent)
+  },
+  {
+    path: 'products/:id',
+    loadComponent: () => import('./components/product-detail/product-detail.component').then(m => m.ProductDetailComponent)
+  },
   { 
     path: 'login',
     loadComponent: () => import('./components/login/login.component').then(m => m.LoginComponent)
@@ -55,6 +63,17 @@ export const routes: Routes = [
     path: 'admin/stores/edit/:id',
     canActivate: [authGuard, adminGuard],
     loadComponent: () => import('./components/admin/store-form/store-form.component').then(m => m.StoreFormComponent)
+  },
+  // Product form (add/edit)
+  {
+    path: 'admin/products/new',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./components/admin/product-form/product-form.component').then(m => m.ProductFormComponent)
+  },
+  {
+    path: 'admin/products/edit/:id',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./components/admin/product-form/product-form.component').then(m => m.ProductFormComponent)
   },
   // Error pages
   {
