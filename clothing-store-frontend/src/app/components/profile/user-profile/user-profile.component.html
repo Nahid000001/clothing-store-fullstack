@@ -1,0 +1,92 @@
+<div class="profile-container">
+  <h2>My Profile</h2>
+  
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading your profile...</p>
+  </div>
+  
+  <div *ngIf="error" class="error-message">
+    <p>{{ error }}</p>
+    <button (click)="loadUserProfile()">Try Again</button>
+  </div>
+  
+  <div *ngIf="success" class="success-message">
+    <p>{{ success }}</p>
+  </div>
+  
+  <div *ngIf="!loading && !error && !showDeleteConfirm">
+    <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
+      <div class="form-section">
+        <h3>Personal Information</h3>
+        
+        <div class="form-group">
+          <label for="first_name">First Name</label>
+          <input id="first_name" type="text" formControlName="first_name">
+          <div *ngIf="profileForm.get('first_name')?.touched && profileForm.get('first_name')?.invalid" class="error">
+            First name is required
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="last_name">Last Name</label>
+          <input id="last_name" type="text" formControlName="last_name">
+          <div *ngIf="profileForm.get('last_name')?.touched && profileForm.get('last_name')?.invalid" class="error">
+            Last name is required
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input id="email" type="email" formControlName="email">
+          <div *ngIf="profileForm.get('email')?.touched && profileForm.get('email')?.errors?.['required']" class="error">
+            Email is required
+          </div>
+          <div *ngIf="profileForm.get('email')?.touched && profileForm.get('email')?.errors?.['email']" class="error">
+            Please enter a valid email address
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h3>Contact Information</h3>
+        
+        <div class="form-group">
+          <label for="address">Address</label>
+          <input id="address" type="text" formControlName="address">
+        </div>
+        
+        <div class="form-group">
+          <label for="phone">Phone</label>
+          <input id="phone" type="tel" formControlName="phone">
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="primary-btn" [disabled]="submitting">
+          <span *ngIf="!submitting">Update Profile</span>
+          <span *ngIf="submitting">Updating...</span>
+        </button>
+      </div>
+    </form>
+    
+    <div class="danger-zone">
+      <h3>Danger Zone</h3>
+      <p>Deleting your account is permanent. All your data will be permanently removed.</p>
+      <button class="delete-btn" (click)="showDeleteConfirmation()">Delete Account</button>
+    </div>
+  </div>
+  
+  <div *ngIf="showDeleteConfirm" class="delete-confirmation">
+    <h3>Delete Account Confirmation</h3>
+    <p>Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.</p>
+    
+    <div class="confirmation-actions">
+      <button class="cancel-btn" (click)="cancelDelete()">Cancel</button>
+      <button class="confirm-delete-btn" (click)="deleteAccount()" [disabled]="submitting">
+        <span *ngIf="!submitting">Yes, Delete My Account</span>
+        <span *ngIf="submitting">Deleting...</span>
+      </button>
+    </div>
+  </div>
+</div> 

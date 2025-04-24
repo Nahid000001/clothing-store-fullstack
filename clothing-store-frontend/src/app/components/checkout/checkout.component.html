@@ -1,0 +1,133 @@
+<div class="checkout-container">
+  <h2>Checkout</h2>
+  
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading checkout information...</p>
+  </div>
+  
+  <div *ngIf="error" class="error-message">
+    <p>{{ error }}</p>
+    <button (click)="loadCart()">Try Again</button>
+  </div>
+  
+  <div *ngIf="success" class="success-message">
+    <p>{{ success }}</p>
+    <p>Redirecting to your orders...</p>
+  </div>
+  
+  <div *ngIf="!loading && !error && !success && cart" class="checkout-content">
+    <div class="order-summary">
+      <h3>Order Summary</h3>
+      <div class="summary-details">
+        <div class="summary-item">
+          <span>Items ({{ cart.item_count }}):</span>
+          <span>${{ cart.total.toFixed(2) }}</span>
+        </div>
+        <div class="summary-item">
+          <span>Shipping & handling:</span>
+          <span>$0.00</span>
+        </div>
+        <div class="summary-item total">
+          <span>Order total:</span>
+          <span>${{ cart.total.toFixed(2) }}</span>
+        </div>
+      </div>
+      
+      <div class="order-items">
+        <h4>Items in your order</h4>
+        <div *ngFor="let item of cart.items" class="order-item">
+          <div class="item-image">
+            <img *ngIf="item.product?.image" [src]="item.product!.image" [alt]="item.product?.name">
+            <div *ngIf="!item.product?.image" class="no-image">No Image</div>
+          </div>
+          <div class="item-details">
+            <h5>{{ item.product?.name }}</h5>
+            <p>Quantity: {{ item.quantity }}</p>
+            <p class="item-price">${{ (item.product?.price || 0) * item.quantity | number:'1.2-2' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checkout-forms">
+      <div class="shipping-section">
+        <h3>Shipping Information</h3>
+        <form [formGroup]="shippingForm" class="shipping-form">
+          <div class="form-group">
+            <label for="street">Street Address</label>
+            <input id="street" type="text" formControlName="street" placeholder="123 Main St">
+            <div *ngIf="shippingForm.get('street')?.touched && shippingForm.get('street')?.invalid" class="error">
+              Street address is required
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city">City</label>
+              <input id="city" type="text" formControlName="city" placeholder="City">
+              <div *ngIf="shippingForm.get('city')?.touched && shippingForm.get('city')?.invalid" class="error">
+                City is required
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="state">State</label>
+              <input id="state" type="text" formControlName="state" placeholder="State">
+              <div *ngIf="shippingForm.get('state')?.touched && shippingForm.get('state')?.invalid" class="error">
+                State is required
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="zipCode">Zip Code</label>
+              <input id="zipCode" type="text" formControlName="zipCode" placeholder="12345">
+              <div *ngIf="shippingForm.get('zipCode')?.touched && shippingForm.get('zipCode')?.invalid" class="error">
+                Zip code is required
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="country">Country</label>
+              <input id="country" type="text" formControlName="country">
+              <div *ngIf="shippingForm.get('country')?.touched && shippingForm.get('country')?.invalid" class="error">
+                Country is required
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <div class="payment-section">
+        <h3>Payment Method</h3>
+        <form [formGroup]="paymentForm" class="payment-form">
+          <div class="form-group">
+            <label>Select Payment Method</label>
+            <div class="payment-options">
+              <div *ngFor="let method of paymentMethods" class="payment-option">
+                <input 
+                  type="radio" 
+                  [id]="method.value" 
+                  formControlName="paymentMethod" 
+                  [value]="method.value">
+                <label [for]="method.value">{{ method.label }}</label>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Credit card form would go here in a real implementation -->
+        </form>
+      </div>
+      
+      <div class="checkout-actions">
+        <button class="secondary" (click)="backToCart()">Back to Cart</button>
+        <button class="primary" (click)="placeOrder()" [disabled]="submitting">
+          <span *ngIf="!submitting">Place Order</span>
+          <span *ngIf="submitting">Processing...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 

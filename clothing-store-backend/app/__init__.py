@@ -101,6 +101,22 @@ def create_app(config_name='default'):
             mongo.db.reviews.create_index("created_at")
             mongo.db.reviews.create_index("rating")
             
+            # Product indexes
+            mongo.db.products.create_index("name")
+            mongo.db.products.create_index("price")
+            mongo.db.products.create_index("category")
+            mongo.db.products.create_index("store_id")
+            
+            # Cart indexes
+            mongo.db.cart.create_index("user_id")
+            mongo.db.cart.create_index([("user_id", 1), ("product_id", 1)], unique=True)
+            mongo.db.cart.create_index("added_at")
+            
+            # Order indexes
+            mongo.db.orders.create_index("user_id")
+            mongo.db.orders.create_index("status")
+            mongo.db.orders.create_index("created_at")
+            
             print("Database indexes created successfully")
     except Exception as e:
         print(f"Index creation warning: {str(e)}")

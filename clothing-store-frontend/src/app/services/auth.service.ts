@@ -272,5 +272,13 @@ export class AuthService {
     const payload = this.decodeToken(user.token);
     return payload?.role === role;
   }
+
+  /**
+   * Get the JWT token from localStorage
+   * @returns The JWT token or null if not found
+   */
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
 }
 

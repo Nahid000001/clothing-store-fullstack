@@ -1,7 +1,7 @@
 // src/app/services/store.service.ts
 import { Injectable } from '@angular/core';
 import { Observable, throwError, of } from 'rxjs';
-import { catchError, timeout, retry, delay, concatMap, retryWhen, tap } from 'rxjs/operators';
+import { catchError, timeout, retry, delay, concatMap, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { ErrorService } from './error.service';
@@ -78,23 +78,14 @@ export class StoreService {
   retryWithBackoff<T>(maxRetries: number = 3, initialDelay: number = 1000): (source: Observable<T>) => Observable<T> {
     return (source: Observable<T>) => {
       return source.pipe(
-        concatMap((value, i) => of(value).pipe(
-          // On success, just return the value
-          catchError((error, caught) => {
-            // If we've reached the max number of retries, throw the error
-            if (i >= maxRetries) {
-              return throwError(() => error);
-            }
-            
-            console.log(`Attempt ${i + 1} failed, retrying in ${initialDelay * Math.pow(2, i)}ms`);
-            
-            // Retry after a delay, exponentially increasing with each attempt
-            return of(value).pipe(
-              delay(initialDelay * Math.pow(2, i)),
-              concatMap(() => caught)
-            );
-          })
-        ))
+        retry({
+          count: maxRetries,
+          delay: (error, retryCount) => {
+            const scaledDelay = initialDelay * Math.pow(2, retryCount - 1);
+            console.log(`Attempt ${retryCount} failed, retrying in ${scaledDelay}ms`);
+            return of(null).pipe(delay(scaledDelay));
+          }
+        })
       );
     };
   }

@@ -8,6 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
@@ -34,9 +35,11 @@ import { User } from '../../models/user.model';
 export class ProfileComponent implements OnInit {
   user: User | null = null;
   profileForm: FormGroup;
-  loading = false;
+  loading = true;
   submitting = false;
-  error = '';
+  error: string | null = null;
+  success: string | null = null;
+  showDeleteConfirm = false;
   readonly avatarColors = ['#3F51B5', '#E91E63', '#009688', '#FF5722', '#607D8B'];
   avatarColor: string = '';
 
@@ -44,12 +47,15 @@ export class ProfileComponent implements OnInit {
     private userService: UserService,
     private authService: AuthService,
     private fb: FormBuilder,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router
   ) {
     this.profileForm = this.fb.group({
-      first_name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-      last_name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-      email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]]
+      first_name: ['', Validators.required],
+      last_name: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      address: [''],
+      phone: ['']
     });
   }
 
@@ -70,23 +76,29 @@ export class ProfileComponent implements OnInit {
     return this.user?.username?.charAt(0).toUpperCase() || 'U';
   }
 
+  refreshProfile(): void {
+    this.loadUserProfile();
+  }
+
   loadUserProfile(): void {
     this.loading = true;
-    this.error = '';
+    this.error = null;
     
-    this.userService.getCurrentUser().subscribe({
-      next: (userData) => {
-        this.user = userData;
+    this.userService.getProfile().subscribe(
+      user => {
+        this.user = user;
         this.profileForm.patchValue({
-          first_name: userData.first_name || '',
-          last_name: userData.last_name || '',
-          email: userData.email || ''
+          first_name: user.first_name || '',
+          last_name: user.last_name || '',
+          email: user.email || '',
+          address: user.address || '',
+          phone: user.phone || ''
         });
         this.loading = false;
       },
-      error: (error) => {
-        console.error('Error loading user profile:', error);
-        this.error = error.message || 'Failed to load user profile. Please try again later.';
+      error => {
+        console.error('Error loading profile:', error);
+        this.error = 'Failed to load your profile. Please try again later.';
         this.loading = false;
         
         this.snackBar.open(this.error, 'Close', {
@@ -94,7 +106,7 @@ export class ProfileComponent implements OnInit {
           panelClass: 'error-snackbar'
         });
       }
-    });
+    );
   }
 
   getErrorMessage(controlName: string): string {
@@ -125,38 +137,30 @@ export class ProfileComponent implements OnInit {
 
   updateProfile(): void {
     if (this.profileForm.invalid) {
-      // Mark all fields as touched to trigger validation messages
-      Object.keys(this.profileForm.controls).forEach(key => {
-        const control = this.profileForm.get(key);
-        control?.markAsTouched();
-      });
-      
-      this.snackBar.open('Please correct the errors in the form before submitting', 'Close', {
-        duration: 5000,
-        panelClass: 'error-snackbar'
-      });
-      
+      this.markFormAsTouched();
       return;
     }
-
+    
     this.submitting = true;
-    this.error = '';
-
-    const userData = this.profileForm.value;
-
-    this.userService.updateProfile(userData).subscribe({
-      next: (updatedUser) => {
-        this.user = updatedUser;
+    this.error = null;
+    this.success = null;
+    
+    const profileData = this.profileForm.value;
+    
+    this.userService.updateProfile(profileData).subscribe(
+      response => {
+        this.user = response;
+        this.success = 'Profile updated successfully!';
         this.submitting = false;
         
-        this.snackBar.open('Profile updated successfully', 'Close', {
+        this.snackBar.open(this.success, 'Close', {
           duration: 3000,
           panelClass: 'success-snackbar'
         });
       },
-      error: (error) => {
+      error => {
         console.error('Error updating profile:', error);
-        this.error = error.message || 'Failed to update profile. Please try again later.';
+        this.error = 'Failed to update your profile. Please try again.';
         this.submitting = false;
         
         this.snackBar.open(this.error, 'Close', {
@@ -164,10 +168,50 @@ export class ProfileComponent implements OnInit {
           panelClass: 'error-snackbar'
         });
       }
+    );
+  }
+
+  markFormAsTouched(): void {
+    Object.keys(this.profileForm.controls).forEach(field => {
+      const control = this.profileForm.get(field);
+      control?.markAsTouched({ onlySelf: true });
     });
   }
 
-  refreshProfile(): void {
-    this.loadUserProfile();
+  showDeleteConfirmation(): void {
+    this.showDeleteConfirm = true;
+    this.error = null;
+    this.success = null;
+  }
+
+  cancelDelete(): void {
+    this.showDeleteConfirm = false;
+  }
+
+  deleteAccount(): void {
+    this.submitting = true;
+    this.error = null;
+    
+    this.userService.deleteAccount().subscribe(
+      response => {
+        this.submitting = false;
+        this.success = 'Your account has been deleted successfully. You will be logged out in a few seconds.';
+        
+        setTimeout(() => {
+          this.authService.logout();
+          this.router.navigate(['/']);
+        }, 3000);
+      },
+      error => {
+        console.error('Error deleting account:', error);
+        this.error = 'Failed to delete your account. Please try again.';
+        this.submitting = false;
+        
+        this.snackBar.open(this.error, 'Close', {
+          duration: 5000,
+          panelClass: 'error-snackbar'
+        });
+      }
+    );
   }
 } 

@@ -1,305 +1,173 @@
-# Clothing Store Application
+# Full Stack Todo Application
 
-A web application for discovering and reviewing clothing stores with Angular frontend and Flask/Python backend.
+A complete todo application with Angular frontend, Flask backend, and MongoDB database.
 
-## Requirements
+## Project Structure
 
-### Backend
+- **Frontend**: Angular application with TypeScript
+- **Backend**: Flask Python API server
+- **Database**: MongoDB with MongoDB Compass
 
-- Python 3.8+
-- MongoDB
-- Redis (optional, for JWT token management)
+## Prerequisites
 
-### Frontend
-
-- Node.js 14+
-- Angular CLI
+- Python 3.8+ and pip
+- Node.js (v14 or higher) and npm
+- MongoDB and MongoDB Compass
+- Angular CLI (`npm install -g @angular/cli`)
 
 ## Setup Instructions
 
-### Clone the Repository
-
-```bash
-git clone <repository-url>
-cd clothing-store-app
-```
-
 ### Backend Setup
 
-```bash
-cd clothing-store-backend
+1. Navigate to the backend directory:
 
-# Create and activate virtual environment (optional but recommended)
-python -m venv venv
-# On Windows
-venv\Scripts\activate
-# On macOS/Linux
-source venv/bin/activate
+   ```
+   cd backend
+   ```
 
-# Install dependencies
-pip install -r requirements.txt
+2. Create and activate a virtual environment:
 
-# Run backend server
-python run.py
-```
+   ```
+   # Windows
+   python -m venv venv
+   venv\Scripts\activate
 
-The backend server will run on http://localhost:5000
+   # macOS/Linux
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+3. Install dependencies:
+
+   ```
+   pip install -r requirements.txt
+   ```
+
+4. Create a `.env` file in the backend directory with the following variables:
+
+   ```
+   FLASK_APP=app.py
+   FLASK_ENV=development
+   MONGO_URI=mongodb://localhost:27017/todoapp
+   FLASK_DEBUG=1
+   ```
+
+5. Start the Flask server:
+   ```
+   flask run
+   ```
+   Or:
+   ```
+   python app.py
+   ```
 
 ### Frontend Setup
 
-```bash
-cd clothing-store-frontend
+1. Navigate to the frontend directory:
 
-# Install dependencies
-npm install
+   ```
+   cd frontend
+   ```
 
-# Run development server
-npm start
-```
+2. Install dependencies:
 
-The frontend application will be available at http://localhost:4200
+   ```
+   npm install
+   ```
 
-## Quick Start
+3. Update the API endpoint in environment files if needed:
 
-### Windows
+   - `src/environments/environment.ts` (development)
+   - `src/environments/environment.prod.ts` (production)
 
-```powershell
-# Run both frontend and backend
-.\start.ps1
-```
+4. Start the Angular development server:
+   ```
+   ng serve
+   ```
+5. Access the application at http://localhost:4200
 
-### macOS/Linux
+### MongoDB Setup with MongoDB Compass
 
-```bash
-# Make script executable (first time only)
-chmod +x start.sh
+1. Install MongoDB on your machine following the [official documentation](https://docs.mongodb.com/manual/installation/).
 
-# Run both frontend and backend
-./start.sh
-```
+2. Install MongoDB Compass:
+
+   - Download MongoDB Compass from the [official website](https://www.mongodb.com/products/compass)
+   - Install the application following the on-screen instructions
+
+3. Start MongoDB service:
+
+   - Windows: `net start MongoDB`
+   - macOS: `brew services start mongodb-community`
+   - Linux: `sudo systemctl start mongod`
+
+4. Connect to MongoDB using MongoDB Compass:
+
+   - Launch MongoDB Compass
+   - Connect to your local MongoDB instance with the connection string: `mongodb://localhost:27017`
+   - Create a new database called "todoapp"
+   - Create a collection called "todos"
+
+5. Verify your database setup:
+   - Check that you can see your "todoapp" database in MongoDB Compass
+   - Ensure you can view the "todos" collection
+
+## API Endpoints
+
+| Method | Endpoint       | Description         |
+| ------ | -------------- | ------------------- |
+| GET    | /api/todos     | Get all todos       |
+| POST   | /api/todos     | Create a new todo   |
+| PUT    | /api/todos/:id | Update a todo by ID |
+| DELETE | /api/todos/:id | Delete a todo by ID |
+
+## Deployment
+
+### Backend Deployment
+
+- Deploy the Flask backend to services like Heroku, Render, or PythonAnywhere.
+- Set up environment variables in your deployment platform.
+- For production, use Gunicorn or uWSGI as WSGI servers.
+
+### Frontend Deployment
+
+- Build the Angular app: `ng build --prod`
+- Deploy the dist folder to services like Netlify, Vercel, or GitHub Pages.
+
+### Database Deployment
+
+- For production, use MongoDB Atlas as your cloud database.
+- Update the MONGO_URI in your backend environment variables.
 
 ## Features
 
-- Browse clothing stores
-- Filter stores by location and type
-- View store details and reviews
-- Add new stores (requires login)
-- Add reviews for stores (requires login)
-- User authentication system
-- Admin management interface
+- Create, read, update, and delete todos
+- Mark todos as complete/incomplete
+- Filter todos by status
+- Responsive design
 
-## Recent Improvements
+## Technologies Used
 
-### Backend Enhancements
+### Frontend
 
-- **Standardized Error Handling**: Implemented consistent error handling using custom exception types across all API endpoints.
-- **Database Optimization**: Added comprehensive MongoDB indexes for stores, users, and reviews collections to improve query performance.
-- **API Documentation**: Added Swagger API documentation to all major endpoints for easier API integration.
-- **Security Improvements**: Enhanced JWT token handling with proper Redis integration for token invalidation.
-- **Data Validation**: Improved validation for all API inputs with clear error messages.
+- Angular
+- TypeScript
+- Angular Material (UI components)
+- RxJS for reactive programming
 
-### Frontend Enhancements
+### Backend
 
-- **Lazy Loading**: Implemented lazy loading for all major routes to improve initial load time and performance.
-- **Form Validation**: Added comprehensive form validation with detailed error messages.
-- **Error Handling**: Improved error handling in services with clear user feedback.
-- **Removed Fallback Data**: Eliminated dummy/fallback data from services to ensure real API interactions.
-- **UI Improvements**: Enhanced modal components and form controls for better user experience.
+- Python
+- Flask framework
+- Flask-PyMongo
+- Flask-CORS
+- python-dotenv for environment variables
 
-### Testing and Documentation
+### Database
 
-- **API Tests**: Extended test coverage for API endpoints.
-- **Documentation**: Updated documentation with detailed setup instructions and feature documentation.
-
-## Architecture
-
-### Backend (Flask/MongoDB)
-
-The backend follows a structured architecture:
-
-- **Routes**: API endpoints for stores, reviews, authentication, and admin operations
-- **Models**: Data models for stores, users, and reviews
-- **Utils**: Utility functions for error handling, validation, and helpers
-- **Middleware**: Authentication and request processing middleware
-- **Config**: Application configuration management
-
-### Frontend (Angular)
-
-The frontend follows Angular best practices:
-
-- **Components**: Modular components for different views and features
-- **Services**: API service layer for backend communication
-- **Guards**: Route guards for authentication and authorization
-- **Interceptors**: HTTP interceptors for authentication token management
-- **Models/Interfaces**: TypeScript interfaces for type safety
+- MongoDB
+- MongoDB Compass (GUI tool)
 
 ## License
 
-[MIT License](LICENSE)
-
-# Clothing Store Application Improvements
-
-This document outlines the improvements made to address critical issues and enhance both frontend and backend components of the application.
-
-## Critical Issues Addressed
-
-### 1. Missing Review Model Implementation
-
-- Created `app/models/review.py` with complete implementation of:
-  - Getting store reviews with pagination
-  - Adding new reviews
-  - Editing existing reviews
-  - Deleting reviews
-  - Adding replies to reviews
-  - Updating store average ratings
-
-### 2. JWT Refresh Token Implementation
-
-- Enhanced `auth.py` with token rotation for better security
-- Implemented secure handling of refresh tokens in Redis
-- Updated frontend auth service to handle token refresh and expiration
-
-### 3. Responsive Design Improvements
-
-- Added media queries to `store-detail.component.scss` for adapting to mobile screens
-- Improved layout for mobile devices
-- Fixed gallery, sidebar, and header components on smaller screens
-
-## Frontend Enhancements
-
-### Responsive Design
-
-- Added breakpoints at 992px, 768px, and 576px
-- Created responsive grid layout for store details
-- Improved image gallery for mobile viewing
-- Enhanced sidebar rendering on smaller screens
-
-### Form Validation & Error Handling
-
-To be implemented:
-
-```
-- Add client-side validation in forms using Angular validators
-- Provide visual feedback for validation errors
-- Create user-friendly error messages
-- Add retry mechanisms for failed API calls
-```
-
-### Performance Optimization
-
-To be implemented:
-
-```
-- Implement lazy loading for routes
-- Add virtual scrolling for long lists
-- Use trackBy in ngFor loops
-```
-
-### User Experience
-
-To be implemented:
-
-```
-- Add loading indicators for all async operations
-- Implement toast notifications for user actions
-- Enhance accessibility with ARIA attributes
-```
-
-## Backend Improvements
-
-### API Security
-
-- Improved refresh token implementation with token rotation
-- Implemented secure token storage in Redis
-
-Additional security measures to implement:
-
-```
-- Enhance rate limiting
-- Add input sanitization for all endpoints
-```
-
-### Database Optimization
-
-To be implemented:
-
-```
-- Add indexes for frequently queried fields
-- Implement pagination for all list endpoints
-```
-
-### Error Handling
-
-To be implemented:
-
-```
-- Create consistent error response formats
-- Add more detailed logging
-```
-
-### Testing
-
-To be implemented:
-
-```
-- Increase test coverage
-- Add integration tests
-```
-
-## Documentation & Code Quality
-
-### Documentation
-
-To be implemented:
-
-```
-- Add API documentation using Swagger UI
-- Improve code comments
-- Complete this README
-```
-
-### Code Quality
-
-- Removed unused imports in frontend components
-- Fixed authentication service implementation
-
-Additional improvements to make:
-
-```
-- Follow consistent naming conventions
-- Remove duplicate code
-- Implement proper TypeScript interfaces
-```
-
-## Implementation Notes
-
-1. The review model now properly handles:
-
-   - Adding/editing/deleting reviews
-   - Managing review replies
-   - Updating store ratings based on reviews
-   - Proper permission handling for reviews
-
-2. The JWT authentication system now:
-
-   - Generates refresh tokens during login
-   - Implements token rotation for security
-   - Automatically refreshes tokens before expiration
-   - Handles token invalidation during logout
-
-3. The responsive design now:
-   - Adapts to screen sizes from desktop to mobile
-   - Maintains usability on small screens
-   - Properly displays all store information
-   - Provides a better mobile user experience
-
-## Next Steps
-
-1. Implement remaining form validation and error handling features
-2. Add performance optimizations
-3. Enhance user experience with loading indicators and notifications
-4. Complete API security with rate limiting and input sanitization
-5. Optimize database operations
-6. Improve error handling and logging
-7. Add comprehensive tests
-8. Complete documentation
+MIT
